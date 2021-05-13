@@ -1,4 +1,3 @@
-# NBA Awards Modeling
 # Making Subjective NBA Awards Objective: Predicting NBA End-of-Season Awards with Statistics
 
 
