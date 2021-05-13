@@ -3,6 +3,8 @@
 
 This project implements machine learning and data analytics methodologies to predict winners of six individual, end-of-season NBA Awards. 
 
+Check out all our predictions for every award (including the yet-to-be-decided 2021 NBA Awards) in our project report.
+
 ## Project Presentation
 
 https://www.youtube.com/watch?v=FOww8dqZVes&ab_channel=RajDasani
