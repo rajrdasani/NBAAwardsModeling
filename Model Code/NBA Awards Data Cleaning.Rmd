@@ -1,0 +1,193 @@
+---
+title: "NBA Awards Data Cleaning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stringi)
+library(dplyr)
+library(corrplot)
+library(GGally)
+library(tm)
+```
+
+DATA CLEANING Part 1: Collecting, Cleaning, and Creating Dataset
+```{r}
+#Collect and read in CSV containing NBA data from 2010-2020
+#Remove accents and misc characters
+nbadata2020 <- read.csv("nba2020.csv")
+Player <-  stri_trans_general(str = nbadata2020$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2020[["Player"]] <- Player
+
+nbadata2019 <- read.csv("nbaStats2019.csv")
+Player <-  stri_trans_general(str = nbadata2020$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2019[["Player"]] <- Player
+
+nbadata2018 <- read.csv("nbaStats2018.csv")
+Player <-  stri_trans_general(str = nbadata2018$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2018[["Player"]] <- Player
+
+nbadata2017 <- read.csv("nbaStats2017.csv")
+Player <-  stri_trans_general(str = nbadata2017$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2017[["Player"]] <- Player
+
+nbadata2016 <- read.csv("nbaStats2016.csv")
+Player <-  stri_trans_general(str = nbadata2016$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2016[["Player"]] <- Player
+
+nbadata2015 <- read.csv("nbaStats2015.csv")
+Player <-  stri_trans_general(str = nbadata2015$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2015[["Player"]] <- Player
+
+nbadata2014 <- read.csv("nbaStats2014.csv")
+Player <-  stri_trans_general(str = nbadata2014$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2014[["Player"]] <- Player
+
+nbadata2013 <- read.csv("nbaStats2013.csv")
+Player <-  stri_trans_general(str = nbadata2013$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2013[["Player"]] <- Player
+
+nbadata2012 <- read.csv("nbaStats2012.csv")
+Player <-  stri_trans_general(str = nbadata2012$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2012[["Player"]] <- Player
+
+nbadata2011 <- read.csv("nbaStats2011.csv")
+Player <-  stri_trans_general(str = nbadata2011$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2011[["Player"]] <- Player
+
+nbadata2010 <- read.csv("nbaStats2010.csv")
+Player <-  stri_trans_general(str = nbadata2010$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+nbadata2010[["Player"]] <- Player
+
+nbadata <- rbind(nbadata2020, nbadata2019, nbadata2018, nbadata2017, nbadata2016, nbadata2015, nbadata2014,nbadata2013, nbadata2012, nbadata2011, nbadata2010)
+
+write.csv(nbadata, "nbadata142.csv")
+```
+
+DATA CLEANING Part 2: Filtering and Subsetting Dataset 
+```{r}
+#Read in CSV containing player basic + advanced statistics and MVP data 
+nba <- read.csv("nbadata142.csv")
+
+#Create copy
+nba2 <- nba
+
+#Replace NA values with 0, filter out players that have played less than 20 games
+nba2[is.na(nba2)] <- 0
+nba2 <- filter(nba2, G > 20)
+
+#Read in CSV containing vote shares for the other four awards. Remove accents on player names
+dpoy <- read.csv("dpoy.csv")
+Player <-  stri_trans_general(str = dpoy$Player, id = "Latin-ASCII")
+dpoy[["Player"]] <- Player
+
+mip <- read.csv("mip.csv")
+Player <-  stri_trans_general(str = mip$Player, id = "Latin-ASCII")
+mip[["Player"]] <- Player
+
+smoy <- read.csv("6moy.csv")
+Player <-  stri_trans_general(str = smoy$Player, id = "Latin-ASCII")
+smoy[["Player"]] <- Player
+
+roy <- read.csv("roy.csv")
+Player <-  stri_trans_general(str = roy$Player, id = "Latin-ASCII")
+roy[["Player"]] <- Player
+
+#Combine Player + Season into single column, i.e LeBron James2020
+nba2$Player <- paste0(nba2$Player,nba2$Season)
+nba2 <- nba2[!duplicated(nba2$Player), ]
+
+dpoy$Player <- paste0(dpoy$Player,dpoy$Season)
+dpoy <- dpoy[!duplicated(dpoy$Player), ]
+
+mip$Player <- paste0(mip$Player,mip$Season)
+mip <- mip[!duplicated(mip$Player), ]
+
+roy$Player <- paste0(roy$Player,roy$Season)
+roy <- roy[!duplicated(roy$Player), ]
+
+smoy$Player <- paste0(smoy$Player,smoy$Season)
+smoy <- smoy[!duplicated(smoy$Player), ]
+
+#Merge voting shares datasets + dataset of basic and advanced statistics
+nba3 <- merge(nba2, dpoy[, c("Player", "DPOY")], by = "Player", all.x = TRUE)
+nba3 <- merge(nba3, roy[, c("Player", "ROY")], by = "Player", all.x = TRUE)
+nba3 <- merge(nba3, smoy[, c("Player", "SMOY")], by = "Player", all.x = TRUE)
+nba3 <- merge(nba3, mip[, c("Player", "MIP")], by = "Player", all.x = TRUE)
+
+#The NBA's ROY and 6MOY awards have qualifications. We will create two subsets of our dataset for these awards
+
+#NBA's ROY award is only eligible for players in their first year
+
+#We collect and clean a CSV containing all rookies from 2010-2020
+rookies <- read.csv("rookies.csv")
+Player <-  stri_trans_general(str = rookies$Player, id = "Latin-ASCII")
+Player <- gsub("\\\\.*", "", Player)
+Player <- gsub("\\*.*", "", Player)
+rookies[["Player"]] <- Player
+
+#Combine season and player for the rookie dataset
+copyrookie <- rookies
+copyrookie$Player <- paste0(copyrookie$Player,copyrookie$Season)
+copyrookie <- copyrookie[!duplicated(copyrookie$Player), ]
+
+#Merge datasets and remove season from player before writing as CSV
+roydata <- merge(nba3, copyrookie)
+
+#Remove Season from player name, Lebron James2020 -> LeBron James
+x <- nba3$Player
+x <- removeNumbers(x)
+nba3$Player <- x
+nba <- nba3
+
+x <- roydata$Player
+x <- removeNumbers(x)
+roydata$Player <- x
+
+nba[is.na(nba)] <- 0
+roydata[is.na(roydata)] <- 0
+smoydata[is.na(smoydata)] <- 0
+
+#NBA's 6MOY award is only eligible for players that have started less games than played, i.e G/2 > GS
+smoydata <- nba %>% filter((G/2) > GS)
+
+#Remove ROY and SMOY columns from nba dataset since we already have separate ones for those awards. Replicate for the other two datasets
+nba$ROY <- NULL
+nba$SMOY <- NULL
+roydata$MVP <- NULL
+roydata$MIP <- NULL
+roydata$SMOY <- NULL
+roydata$DPOY <- NULL
+smoydata$MVP <- NULL
+smoydata$DPOY <- NULL
+smoydata$MIP <- NULL
+
+write.csv(nba, "update142.csv")
+write.csv(roydata, "roydata142.csv")
+write.csv(smoydata, "smoydata142.csv")
+```
+
