@@ -66,11 +66,11 @@ The following steps should be taken to run the four regression models:
 
 
 ## Contributors
-Kenny Tran: kennyletran@berkeley.edu
-Bikram Khaira: bikramk@berkeley.edu
-Nilay Agarwalla: nilaypitt@berkeley.edu
-Sarah Truong: struong19@berkeley.edu
-Raj Dasani: rajdasani@berkeley.edu
+- Kenny Tran: kennyletran@berkeley.edu
+- Bikram Khaira: bikramk@berkeley.edu
+- Nilay Agarwalla: nilaypitt@berkeley.edu
+- Sarah Truong: struong19@berkeley.edu
+- Raj Dasani: rajdasani@berkeley.edu
 
 ## Acknowledgements
 Thank you to Basketball Reference and the official NBA website for providing the datasets used in this analysis. Thank you to the IEOR 142, Introduction to Machine Learning and Data Analytics, course staff for their guidance throughout this project. 
